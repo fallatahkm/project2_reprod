@@ -1,0 +1,64 @@
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+in the begaining we recall the tidyvrese packages
+read the file using read_csv
+```{r}
+activity <- read_csv("activity.csv",na =c("","NA"))
+```
+Histogram of the total number of steps taken each day
+```{r}
+hist(activity$steps,xlab = "day", ylab = "Step No.")
+```
+Mean and median number of steps taken each day
+```{r} 
+mean_seps <- mean(activity$steps, na.rm = TRUE)
+median_steps_day <- median(activity$steps, na.rm = TRUE)
+print(mean_seps)
+print(median_steps_day)
+```
+Time series plot of the average number of steps taken
+```{r}
+library(zoo)
+plot(zoo(activity$date,activity$steps),xlab = "Date",
+     ylab = "Steps", main = "Time series of steps per days")
+```
+The 5-minute interval that, on average, contains the maximum number of steps
+```{r}
+activity[max(activity$interval, na.rm = TRUE),][[1]]
+```
+
+method No.1:-  code to describe and show a strategy for imputing missing data using mean
+```{r}
+activity$steps[is.na(activity$steps)] <- 
+        mean(activity$steps, na.rm = TRUE)
+```      
+method No.2:-  code to describe and show a strategy for imputing missing data using medain
+```{r}
+activity$median_steps <- if_else(is.na(activity$steps) , 
+        median(activity$steps,na.rm = T),activity$steps)
+```
+check the new data
+```{r}
+head(activity)
+```
+Histogram of the total number of steps taken each day after missing values are imputed
+```{r}
+hist(activity$steps, xlab = "Steps", ylab = "Freq"
+     , main = "Total number of steps taken each day 
+     after missing values are imputed")
+```
+Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
+creat a column call week cantain weekday and weekend
+```{r}
+activity$week <- weekdays(activity$date)
+activity$week <-as.factor(ifelse(activity$week == "Saturday"| 
+                activity$week == "Sunday", "Weekend", "Weekday"))
+```
+creat the panel ploting using ggplot2
+```{r}
+ggplot(activity,aes(y = interval))+ geom_boxplot()+
+        facet_wrap("week")
+```
